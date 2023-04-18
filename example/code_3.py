@@ -10,8 +10,8 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 # データの取得
-start_date = '2023-01-01'
-end_date = '2023-04-16'
+start_date = '2022-01-01'
+end_date = '2023-04-17'
 ticker = 'JPY=X'  # 円ドルの為替レートを表すシンボル
 data = yf.download(ticker, start=start_date, end=end_date, interval='1d')
 data = data[['Close']]
@@ -24,7 +24,7 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 y_scaled = scaler.fit_transform(y)
 
 # 訓練データとテストデータに分割
-train_size = int(len(y_scaled) * 0.8)
+train_size = int(len(y_scaled) * 0.95)
 test_size = len(y_scaled) - train_size
 train, test = y_scaled[0:train_size,:], y_scaled[train_size:len(y_scaled),:]
 
@@ -66,10 +66,10 @@ ensemble_forecast = (weights[0] * arima_forecast) + (weights[1] * sarima_forecas
 # グラフで予測結果を表示
 plt.figure(figsize=(12, 6))
 plt.plot(data. index[-test_size:], y[train_size:len(y_scaled),:], label='Actual')
-plt.plot(data.index[-test_size:], arima_forecast, label='ARIMA Forecast')
-plt.plot(data.index[-test_size:], sarima_forecast, label='SARIMA Forecast')
+#plt.plot(data.index[-test_size:], arima_forecast, label='ARIMA Forecast')
+#plt.plot(data.index[-test_size:], sarima_forecast, label='SARIMA Forecast')
 plt.plot(data.index[-test_size:], lstm_forecast, label='LSTM Forecast')
-plt.plot(data.index[-test_size:], ensemble_forecast, label='Ensemble Forecast')
+#plt.plot(data.index[-test_size:], ensemble_forecast, label='Ensemble Forecast')
 plt.xlabel('Date')
 plt.ylabel('Exchange Rate (JPY/USD)')
 plt.title('Exchange Rate (JPY/USD) Forecast')
