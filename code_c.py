@@ -33,7 +33,7 @@ scaler = MinMaxScaler(feature_range=(0,1))
 scaled_data = scaler.fit_transform(dataset)
 
 # 全体の80%をトレーニングデータとして扱う 今は90
-training_data_len = int(np.ceil( len(dataset) * .9 ))
+training_data_len = int(np.ceil( len(dataset) * .95 ))
 
 # どれくらいの期間をもとに予測するか
 window_size = 100
@@ -61,7 +61,6 @@ model.add(Dropout(0.2))
 model.add(LSTM(units=50))
 model.add(Dropout(0.2))
 model.add(Dense(units=1))
-
 model.compile(optimizer='adam', loss='mean_squared_error')
 history = model.fit(x_train, y_train, batch_size=32, epochs=100)
 
@@ -73,15 +72,22 @@ test_data = scaled_data[training_data_len - window_size: , :]
 
 x_test = []
 y_test = dataset[training_data_len:, :]
-for i in range(window_size, len(test_data)):
-    x_test.append(test_data[i-window_size:i, 0])
+x_test.append(test_data[:window_size])
 
 # numpy arrayに変換
 x_test = np.array(x_test)
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1 ))
-print(x_test)
+
 # 予測を実行する
-predictions = model.predict(x_test)
+predictions = []
+for i in range(len(y_test)):    #for i in range(len(y_test)):
+    prediction = model.predict(x_test)
+    x_test = x_test.tolist()
+    x_test[0] = x_test[0][1:]
+    prediction = [prediction[0].tolist()]
+    x_test[0].append(prediction[0])
+    x_test = np.array(x_test)
+    predictions.extend(prediction)
 predictions = scaler.inverse_transform(predictions)
 
 # 二乗平均平方根誤差（RMSE）: 0に近いほど良い
